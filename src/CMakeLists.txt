@@ -333,28 +333,6 @@ endif()
 
 # build libraries
 
-# Some headers are dynamically generated and have to be taken into account before
-add_custom_command(
-    PRE_BUILD
-    OUTPUT cacheAttributesDefinition.hpp displayAttributesDefinition.hpp evalAttributesDefinition.hpp evaluatorControlAttributesDefinition.hpp pbAttributesDefinition.hpp runAttributesDefinition.hpp
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/Attribute/cacheAttributesDefinition.txt ${CMAKE_CURRENT_BINARY_DIR}/cacheAttributesDefinition.txt
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/Attribute/displayAttributesDefinition.txt ${CMAKE_CURRENT_BINARY_DIR}/displayAttributesDefinition.txt
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/Attribute/evalAttributesDefinition.txt ${CMAKE_CURRENT_BINARY_DIR}/evalAttributesDefinition.txt
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/Attribute/evaluatorControlAttributesDefinition.txt ${CMAKE_CURRENT_BINARY_DIR}/evaluatorControlAttributesDefinition.txt
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/Attribute/pbAttributesDefinition.txt ${CMAKE_CURRENT_BINARY_DIR}/pbAttributesDefinition.txt
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/Attribute/runAttributesDefinition.txt ${CMAKE_CURRENT_BINARY_DIR}/runAttributesDefinition.txt
-    COMMAND WriteAttributeDefinitionFile
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/cacheAttributesDefinition.hpp ${CMAKE_CURRENT_SOURCE_DIR}/Attribute/cacheAttributesDefinition.hpp
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/displayAttributesDefinition.hpp ${CMAKE_CURRENT_SOURCE_DIR}/Attribute/displayAttributesDefinition.hpp
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/evalAttributesDefinition.hpp ${CMAKE_CURRENT_SOURCE_DIR}/Attribute/evalAttributesDefinition.hpp
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/evaluatorControlAttributesDefinition.hpp ${CMAKE_CURRENT_SOURCE_DIR}/Attribute/evaluatorControlAttributesDefinition.hpp
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/pbAttributesDefinition.hpp ${CMAKE_CURRENT_SOURCE_DIR}/Attribute/pbAttributesDefinition.hpp
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/runAttributesDefinition.hpp ${CMAKE_CURRENT_SOURCE_DIR}/Attribute/runAttributesDefinition.hpp
-    DEPENDS WriteAttributeDefinitionFile)
-
-add_custom_target(write_attributes
-    DEPENDS cacheAttributesDefinition.hpp displayAttributesDefinition.hpp evalAttributesDefinition.hpp evaluatorControlAttributesDefinition.hpp pbAttributesDefinition.hpp runAttributesDefinition.hpp)
-
 # Utils
 add_library (nomadUtils SHARED ${MATH_SOURCES} ${OUTPUT_SOURCES} ${PARAM_SOURCES} ${TYPE_SOURCES} ${UTIL_SOURCES})
 target_include_directories(nomadUtils PUBLIC
@@ -364,7 +342,6 @@ target_include_directories(nomadUtils PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/Type
     ${CMAKE_CURRENT_SOURCE_DIR}/Util>
     $<INSTALL_INTERFACE:include/nomad>)
-add_dependencies(nomadUtils write_attributes)
 if(OpenMP_CXX_FOUND)
     target_link_libraries(nomadUtils PUBLIC OpenMP::OpenMP_CXX)
 endif()
@@ -400,12 +377,6 @@ endif()
 
 # build executables
 
-# build attribute executable
-add_executable(WriteAttributeDefinitionFile ${ATTRIBUTE_SOURCES})
-target_include_directories(WriteAttributeDefinitionFile PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Attribute>
-    $<INSTALL_INTERFACE:include/nomad>)
-
 add_executable (nomad ${NOMAD_SOURCES}) 
 target_include_directories(nomad PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/ 
@@ -430,7 +401,7 @@ else()
 endif()
 
 # installing executables and libraries
-install(TARGETS nomad WriteAttributeDefinitionFile nomadUtils nomadEval nomadAlgos nomadInterface
+install(TARGETS nomad nomadUtils nomadEval nomadAlgos nomadInterface
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/nomad)
